@@ -3,9 +3,10 @@ from sys import argv
 from json import dumps, dump
 import copy
 '''filename, out_filename, out_type  = argv'''
-out_type = 'report' '''report or json'''
-filename = 'C:\Users\linikova\Desktop\maillog.txt'
-out_filename = 'C:\Users\linikova\Desktop\maillog_parsed.txt'
+'''report or json'''
+out_type = 'report'
+filename = 'D:\\maiilog\\tax6\\fullmaillog.log'
+out_filename = 'C:\\Users\\linikova\\Desktop\\maillog_parsed.txt'
 
 
 
@@ -135,8 +136,8 @@ for message_id in emailarray.keys():
 
 
 # results to file
-if(bool(rejectedarray)):
-    if (out_type == 'report'):
+if bool(rejectedarray):
+    if str(out_type) is 'report':
         result_to_report(out_filename, rejectedarray)
-    elif(out_type == 'json'):
+    elif str(out_type) is 'json':
         result_to_json(out_filename, rejectedarray)
