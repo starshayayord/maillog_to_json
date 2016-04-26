@@ -110,9 +110,6 @@ def result_to_report(out_filename, rejectedarray):
             outfile.write("RECIPIENT: %s \n" % str(mail.recipient))
 
 
-
-
-
 emailarray = dict()
 with open(filename, mode='r') as f:
     for line in f:
