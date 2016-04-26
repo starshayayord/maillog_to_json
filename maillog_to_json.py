@@ -2,10 +2,11 @@ import re
 from sys import argv
 from json import dumps, dump
 import copy
-'''filename, out_filename  = argv'''
-#filename = "D:\GitProjects\maillog_to_json\maillog.0"
+'''filename, out_filename, out_type  = argv'''
+out_type = 'report' '''report or json'''
 filename = 'C:\Users\linikova\Desktop\maillog.txt'
 out_filename = 'C:\Users\linikova\Desktop\maillog_parsed.txt'
+
 
 
 
@@ -38,7 +39,7 @@ class REProper(object):
         return bool(self.rematch)
 
     def group(self, i):
-        return self.rematch.group()
+        return self.rematch.group(i)
 
 
 def set_default(obj):
@@ -66,18 +67,18 @@ def lineparse(line):
                 email.client = m.group(1)
                 return email
 
-            elif m.match(r": from=<(.*?)>"):
+            elif m.match(r": from=<(.*?)>.*"):
                 email.sender = m.group(1)
                 return email
 
-            elif m.match(r": to=<(.*?)>"):
+            elif m.match(r": to=<(.*?)>.*"):
                 email.addRecipient(m.group(1))
                 return email
 
     return None
 
 
-def result_to_file(out_filename, rejectedarray):
+def result_to_json(out_filename, rejectedarray):
     with open(out_filename, 'w') as outfile:
         outfile.write("[\n")
     for mail in notlast(rejectedarray.values()):
@@ -95,6 +96,17 @@ def result_to_file(out_filename, rejectedarray):
         dump(mail, outfile)
     with open(out_filename, 'a') as outfile:
         outfile.write("\n]")
+
+
+def result_to_report(out_filename, rejectedarray):
+    with open(out_filename, 'w') as outfile:
+        outfile.write("REPORT:\n")
+    for mail in rejectedarray.values():
+        with open(out_filename, 'a') as outfile:
+            outfile.write("ID: %s \n" % str(mail.id))
+            outfile.write("CLIENT: %s \n" % str(mail.client))
+            outfile.write("SENDER: %s \n" % str(mail.sender))
+            outfile.write("RECIPIENT: %s \n" % str(mail.recipient))
 
 
 
@@ -124,4 +136,7 @@ for message_id in emailarray.keys():
 
 # results to file
 if(bool(rejectedarray)):
-    result_to_file(out_filename, rejectedarray)
+    if (out_type == 'report'):
+        result_to_report(out_filename, rejectedarray)
+    elif(out_type == 'json'):
+        result_to_json(out_filename, rejectedarray)
