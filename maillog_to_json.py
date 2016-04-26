@@ -10,7 +10,6 @@ out_filename = 'C:\Users\linikova\Desktop\maillog_parsed.txt'
 
 
 class Message(object):
-    id = ""
     client = ""
     sender = ""
 
@@ -58,22 +57,22 @@ def notlast(itr):
 
 def lineparse(line):
     elem = line.split(' ', 6)
+    if (bool(elem[5])):
+        if (bool(re.match(r"([a-zA-Z0-9:]{1,})", elem[5]))):
+            e_id = elem[5].strip(':')
+            m = REProper(line)
+            email = copy.copy(Message(e_id))
+            if m.match(r": client=(.*).*"):
+                email.client = m.group(1)
+                return email
 
-    if (bool(re.match(r"([a-zA-Z0-9:]{1,})", elem[5]))):
-        e_id = elem[5].strip(':')
-        m = REProper(line)
-        email = copy.copy(Message(e_id))
-        if m.match(r": client=(.*).*"):
-            email.client = m.group(1)
-            return email
+            elif m.match(r": from=<(.*?)>"):
+                email.sender = m.group(1)
+                return email
 
-        elif m.match(r": from=<(.*?)>"):
-            email.sender = m.group(1)
-            return email
-
-        elif m.match(r": to=<(.*?)>"):
-            email.addRecipient(m.group(1))
-            return email
+            elif m.match(r": to=<(.*?)>"):
+                email.addRecipient(m.group(1))
+                return email
 
     return None
 
@@ -124,4 +123,5 @@ for message_id in emailarray.keys():
 
 
 # results to file
-#result_to_file(out_filename, rejectedarray)
+if(bool(rejectedarray)):
+    result_to_file(out_filename, rejectedarray)
