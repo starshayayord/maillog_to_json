@@ -1,11 +1,12 @@
-import re
+import re, glob
 from sys import argv
 from json import dumps, dump
 import copy
 '''filename, out_filename, out_type  = argv'''
 '''report or json'''
 out_type = 'report'
-filename = 'D:\\maiilog\\tax6\\fullmaillog.log'
+
+filename = 'D:\\maiilog\\tax6\\maillog*'
 out_filename = 'C:\\Users\\linikova\\Desktop\\maillog_parsed.txt'
 
 
@@ -107,24 +108,28 @@ def result_to_report(out_filename, rejectedarray):
             outfile.write("ID: %s \n" % str(mail.id))
             outfile.write("CLIENT: %s \n" % str(mail.client))
             outfile.write("SENDER: %s \n" % str(mail.sender))
-            outfile.write("RECIPIENT: %s \n" % str(mail.recipient))
+            outfile.write("RECIPIENT: ")
+            outfile.write(', '.join([str(item) for item in mail.recipient]))
+            outfile.write("\n\n")
 
 
 emailarray = dict()
-with open(filename, mode='r') as f:
-    for line in f:
-        msg = lineparse(line)
-        if bool(msg):
-            if msg.id in emailarray:
-                if bool(msg.client):
-                    emailarray[msg.id].client = msg.client
-                elif bool(msg.sender):
-                    emailarray[msg.id].sender = msg.sender
-                elif bool(msg.recipient):
-                    if not msg.recipient in emailarray[msg.id].recipient:
-                        emailarray[msg.id].addRecipient(msg.recipient)
-            else:
-                emailarray[msg.id] = msg
+listing = glob.glob(filename)
+for file_log in listing:
+    with open(file_log, mode='r') as f:
+        for line in f:
+            msg = lineparse(line)
+            if bool(msg):
+                if msg.id in emailarray:
+                    if bool(msg.client):
+                        emailarray[msg.id].client = msg.client
+                    elif bool(msg.sender):
+                        emailarray[msg.id].sender = msg.sender
+                    elif bool(msg.recipient):
+                        if not msg.recipient in emailarray[msg.id].recipient:
+                            emailarray[msg.id].addRecipient(msg.recipient)
+                else:
+                    emailarray[msg.id] = msg
 # parse rejected
 rejectedarray = dict()
 for message_id in emailarray.keys():
