@@ -7,7 +7,7 @@ import copy
 '''report or json'''
 out_type = 'report'
 
-filename = 'D:\\maillog\\mailtest.log'
+filename = 'D:\\maillog\\*'
 out_dir = 'D:\\maillog'
 
 
@@ -60,8 +60,8 @@ def notlast(itr):
 def lineparse(line):
     elem = line.split(' ', 7)
     if (bool(elem[5])):
-        if (bool(re.match(r"[a-zA-Z0-9:]{1,}", elem[6]))):
-            e_id = elem[6].strip(':')
+        if (bool(re.match(r"[a-zA-Z0-9]{1,}:", elem[5]))):
+            e_id = elem[5].strip(':')
             m = REProper(line)
             email = copy.copy(Message(e_id))
             if m.match(r": client=(.*)"):
