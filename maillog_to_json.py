@@ -1,4 +1,5 @@
-import re, glob
+import re
+import glob
 from sys import argv
 from json import dumps, dump
 import copy
@@ -6,10 +7,8 @@ import copy
 '''report or json'''
 out_type = 'report'
 
-filename = 'D:\\maiilog\\tax6\\maillog*'
-out_filename = 'C:\\Users\\linikova\\Desktop\\maillog_parsed.txt'
-
-
+filename = 'D:\\maillog\\mailtest.log'
+out_dir = 'D:\\maillog'
 
 
 class Message(object):
@@ -59,28 +58,29 @@ def notlast(itr):
 
 
 def lineparse(line):
-    elem = line.split(' ', 6)
+    elem = line.split(' ', 7)
     if (bool(elem[5])):
-        if (bool(re.match(r"([a-zA-Z0-9:]{1,})", elem[5]))):
-            e_id = elem[5].strip(':')
+        if (bool(re.match(r"[a-zA-Z0-9:]{1,}", elem[6]))):
+            e_id = elem[6].strip(':')
             m = REProper(line)
             email = copy.copy(Message(e_id))
-            if m.match(r": client=(.*).*"):
+            if m.match(r": client=(.*)"):
                 email.client = m.group(1)
                 return email
 
-            elif m.match(r": from=<(.*?)>.*"):
+            elif m.match(r": from=<(.*?)>"):
                 email.sender = m.group(1)
                 return email
 
-            elif m.match(r": to=<(.*?)>.*"):
+            elif m.match(r": to=<(.*?)>"):
                 email.addRecipient(m.group(1))
                 return email
 
     return None
 
 
-def result_to_json(out_filename, rejectedarray):
+def result_to_json(out_dir, rejectedarray):
+    out_filename = out_dir + '\\other.log'
     with open(out_filename, 'w') as outfile:
         outfile.write("[\n")
     for mail in notlast(rejectedarray.values()):
@@ -100,10 +100,25 @@ def result_to_json(out_filename, rejectedarray):
         outfile.write("\n]")
 
 
-def result_to_report(out_filename, rejectedarray):
-    with open(out_filename, 'w') as outfile:
-        outfile.write("REPORT:\n")
+def result_to_report(out_dir, rejectedarray):
     for mail in rejectedarray.values():
+        n = REProper(mail.client)
+        if n.match(r".*?keweb.*"):
+            out_filename = out_dir + '\\keweb.log'
+        elif n.match(r".*?billy.*"):
+            out_filename = out_dir + '\\billy.log'
+        elif n.match(r".*?normativ.*"):
+            out_filename = out_dir + '\\normativ.log'
+        elif n.match(r".*?referent.*"):
+            out_filename = out_dir + '\\referent.log'
+        elif n.match(r".*?help.*"):
+            out_filename = out_dir + '\\help.log'
+        elif (bool(re.match(r".*?(adaptec|blinovu|StorView|ipmi).*", mail.sender))):
+            out_filename = out_dir + '\\sps.log'
+        elif n.match(".*?sites.*"):
+            out_filename = out_dir + '\\websites.log'
+        else:
+            out_filename = out_dir + '\\other.log'
         with open(out_filename, 'a') as outfile:
             outfile.write("ID: %s \n" % str(mail.id))
             outfile.write("CLIENT: %s \n" % str(mail.client))
@@ -140,6 +155,6 @@ for message_id in emailarray.keys():
 # results to file
 if bool(rejectedarray):
     if str(out_type) is 'report':
-        result_to_report(out_filename, rejectedarray)
+        result_to_report(out_dir, rejectedarray)
     elif str(out_type) is 'json':
-        result_to_json(out_filename, rejectedarray)
+        result_to_json(out_dir, rejectedarray)
